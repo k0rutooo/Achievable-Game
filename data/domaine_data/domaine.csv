@@ -1,0 +1,38 @@
+ID,Parent,Label,Type
+GLO,,Global,Hub
+INT,GLO,Intellect,Hub
+PRO,INT,Programmation,Hub
+SOC,GLO,Social,Hub
+CUL,SOC,Culture,Hub
+SAN,GLO,Santé,Hub
+SPO,SAN,Sport,Hub
+SPOC,SPO,Sport de Combat,Hub
+MUS,SPO,Musculation,Hub
+CAR,SPO,Cardio,Hub
+
+PYT,PRO,Python,Domaine
+NAT,MUS;CAR,Natation,Domaine
+STR,MUS,StreetWorkout,Domaine
+COU,CAR,Course à Pied,Domaine
+GYM,MUS,Gym,Domaine
+FRA,CAR,Fractionné,Domaine
+BOXA,SPOC,Boxe Anglaise,Domaine
+SPR,CAR,Sprint,Domaine
+VEL,CAR,Vélo,Domaine
+
+SYN,PYT,Syntaxe,Composant
+BIB,PYT,Bibliothèques,Composant
+UI/,PYT,UI/UX,Composant
+MAN,PYT,Manipulation de Données,Composant
+LOG,PYT,Logique/Algorithme,Composant
+ABD,STR;GYM;NAT,Abdos,Composant
+TEC,BOXA,Technique,Composant
+DÉP,BOXA,Déplacement,Composant
+BRA,STR;GYM;NAT;BOXA,Bras,Composant
+AÉR,NAT;FRA;COU;BOXA;VEL,Aérobie,Composant
+ÉPA,STR;GYM;NAT;BOXA,Épaule,Composant
+ANA,FRA;SPR;BOXA,Anaérobie,Composant
+SPA,BOXA,Sparring,Composant
+JAM,STR;SPR;GYM;FRA;COU;VEL,Jambes,Composant
+PEC,STR;GYM,Pectoraux,Composant
+DOS,STR;GYM;NAT,Dos,Composant

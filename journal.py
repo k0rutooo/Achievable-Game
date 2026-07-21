@@ -1,13 +1,22 @@
 import streamlit as st
-from utils import creer_quete,charger_donnees_user,charger_quetes_user,valider_quete,supprimer_quete
+import pandas as pd
+from utils.data import charger_donnees_user, charger_quetes_user
+from utils.quests import creer_quete, supprimer_quete, valider_quete
 
 df = charger_donnees_user
 df_q = charger_quetes_user(st.session_state.username)
 
+# ------------------------------------------------------------------------------------
+#   INTERFACE
+# ------------------------------------------------------------------------------------
+
 st.set_page_config(layout="wide", page_title="Journal de Quêtes")
 
-
 tab1, tab2, tab3 = st.tabs(["Quêtes Active","Historique","Création de Quêtes"])
+
+# ------------------------------------------------------------------------------------
+#   QUÊTES EN COURS
+# ------------------------------------------------------------------------------------
 
 with tab1:
     st.title("🎯 Quêtes en cours")
@@ -33,13 +42,27 @@ with tab1:
                     if st.button("🗑️", key=f"del_{quete['ID_Quete']}"):
                         supprimer_quete(st.session_state.username, quete['ID_Quete'])
                         st.rerun()
+
+# ------------------------------------------------------------------------------------
+#   HISTORIQUE DE QUÊTES
+# ------------------------------------------------------------------------------------
+
 with tab2:
     st.title("🎯 Quêtes Terminées")
 
     df_h = charger_quetes_user(st.session_state.username)
 
-    # On ne montre que les quêtes pas encore terminées
+    # On ne montre que les quêtes terminées, triées par date de complétion
     quetes_terminees = df_h[df_h['Statut'] == "Terminée"]
+
+    if not quetes_terminees.empty:
+        quetes_terminees = quetes_terminees.copy()
+        quetes_terminees['Date_Completion_Sort'] = pd.to_datetime(
+            quetes_terminees['Date_Completion'], dayfirst=True, errors='coerce'
+        )
+        quetes_terminees = quetes_terminees.sort_values(
+            by='Date_Completion_Sort', ascending=False, na_position='last'
+        )
 
     if quetes_terminees.empty:
         st.info("Ton carnet de quêtes est vide. Crée-en une pour progresser !")
@@ -49,7 +72,11 @@ with tab2:
                 c1, c2 = st.columns([0.8, 0.2])
                 with c1:
                     st.write(f"**{quete['Titre']}**")
-                    st.caption(f"📍 {quete['ID_Competence']}  |  🏆 {quete['XP_Recompense']} XP")
+                    st.caption(f"📍 {quete['ID_Competence']}  |  🏆 {quete['XP_Recompense']} XP | {quete['Date_Completion']}")
+
+# ------------------------------------------------------------------------------------
+#   CRÉATION DE QUÊTES
+# ------------------------------------------------------------------------------------
 
 with tab3:
     st.title("🛡️ Tableau des Quêtes")
