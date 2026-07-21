@@ -2,27 +2,42 @@ import streamlit as st
 import pandas as pd
 from streamlit_echarts import st_echarts
 from PIL import Image
-from utils import charger_donnees_user, get_global_level, charger_quetes_user,preparer_donnees_graphique,obtenir_titre_rang
-from utils_asset import get_rang_image
+from utils.analytics import preparer_donnees_graphique
+from utils.data import charger_donnees_user, charger_quetes_user
+from utils.progression import get_global_level, obtenir_titre_rang
+from utils.utils_asset import get_rang_image
 
-# --- 1. CONFIGURATION (TOUJOURS EN PREMIER) ---
+# ------------------------------------------------------------------------------------
+#   1. CONFIGURATION (TOUJOURS EN PREMIER)
+# ------------------------------------------------------------------------------------
+
 st.set_page_config(layout="wide", page_title="Hall des Héros")
 
-# --- 2. RÉCUPÉRATION DES DONNÉES ---
+# ------------------------------------------------------------------------------------
+#   2. RÉCUPÉRATION DES DONNÉES 
+# ------------------------------------------------------------------------------------
+
 user = st.session_state.username
 df_user = charger_donnees_user(user)
 lvl_global = get_global_level(user)
 df_q = charger_quetes_user(user)
 titre = obtenir_titre_rang(lvl_global)
 
-# --- 3. LAYOUT & STYLE ---
+# ------------------------------------------------------------------------------------
+#   3. LAYOUT & STYLE
+# ------------------------------------------------------------------------------------
+
 st.markdown("""
 <style>
     .block-container { padding-top: 3rem; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- LIGNE 1 : PROFIL & NIVEAU ---
+
+# ------------------------------------------------------------------------------------
+#   LIGNE 1 : PROFIL & NIVEAU
+# ------------------------------------------------------------------------------------
+
 col1, col2 = st.columns([0.7, 0.3])
 
 with col1:
@@ -59,7 +74,10 @@ with col2:
 
         except FileNotFoundError:
             st.error("Le fichier png est introuvable. Veuillez le charger.")
-# --- LIGNE 2 : STATS & GRAPHIQUE ---
+
+# ------------------------------------------------------------------------------------
+#   LIGNE 2 : STATS & GRAPHIQUE
+# ------------------------------------------------------------------------------------
 
 with st.container(height='stretch',border=True):
     # 1. Sélecteur de période
@@ -99,9 +117,9 @@ with st.container(height='stretch',border=True):
                     "type": "line",
                     "smooth": True,
                     "symbol": "none",
-                    "lineStyle": {"color": "#CB2424", "width": 3},
+                    "lineStyle": {"color": "#FFFFFF", "width": 3},
                     "areaStyle": {
-                        "color": "rgba(255, 120, 120, 0.2)" # Petit effet de remplissage sous la courbe
+                        "color": "rgba(255, 255, 255, 0.2)" # Petit effet de remplissage sous la courbe
                     },
                 }
             ],

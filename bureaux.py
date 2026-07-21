@@ -2,21 +2,37 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from streamlit_echarts import st_echarts
-from utils import (charger_donnees_user, get_level, creer_domaine, obtenir_stats_completes,
-                   supprimer_domaine, charger_quetes_user, valider_quete, preparer_donnees_echarts_bureau,
-                   supprimer_quete, creer_quete, get_global_level, calculer_xp_noeud,calculer_fraicheur, obtenir_date_fraicheur_reelle)
-from utils_ai import generer_suggestion_quete
+from utils.analytics import preparer_donnees_echarts_bureau
+from utils.data import charger_donnees_user, charger_quetes_user
+from utils.progression import (
+    calculer_fraicheur,
+    calculer_xp_noeud,
+    get_global_level,
+    get_level,
+    obtenir_date_fraicheur_reelle,
+    obtenir_stats_completes,
+)
+from utils.quests import creer_quete, supprimer_quete, valider_quete
 
-# 1. CONFIGURATION
+# ------------------------------------------------------------------------------------
+#   1. CONFIGURATION
+# ------------------------------------------------------------------------------------
+
 st.set_page_config(layout="wide", page_title="Bureaux de Domaine")
 
-# 2. INITIALISATION
+# ------------------------------------------------------------------------------------
+#   2. INITIALISATION
+# ------------------------------------------------------------------------------------
+
 if "onglet_actuel" not in st.session_state:
     st.session_state.onglet_actuel = "Bureau"
 if "domaine_actif" not in st.session_state:
     st.session_state.domaine_actif = None
 
-# --- 3. RÉCUPÉRATION DES DONNÉES (BLOC SÉCURISÉ) ---
+# ------------------------------------------------------------------------------------
+#   3. RÉCUPÉRATION DES DONNÉES (BLOC SÉCURISÉ)
+# ------------------------------------------------------------------------------------
+
 user = st.session_state.username
 df_user = charger_donnees_user(user)
 domaine = st.session_state.get('domaine_actif')
@@ -34,24 +50,24 @@ if domaine:
         date_la_plus_recente = obtenir_date_fraicheur_reelle(df_user, domaine)
         fraicheur = calculer_fraicheur(date_la_plus_recente)
 
-# --- NAVIGATION ---
+# ------------------------------------------------------------------------------------
+#   NAVIGATION
+# ------------------------------------------------------------------------------------
 
-cols_nav = st.columns([1, 1, 1])
+cols_nav = st.columns([1, 1])
 if cols_nav[0].button("🏢 Bureau", use_container_width=True):
     st.session_state.onglet_actuel = "Bureau"
     st.rerun()
 if cols_nav[1].button("🗄️ Tiroir de Domaine", use_container_width=True):
     st.session_state.onglet_actuel = "Tiroir"
     st.rerun()
-if cols_nav[2].button("🛠️ Création / Gestion", use_container_width=True):
-    st.session_state.onglet_actuel = "Gestion"
-    st.rerun()
 
 st.divider()
 
-# --- LOGIQUE D'AFFICHAGE SELON L'ONGLET ---
+# ------------------------------------------------------------------------------------
+#   ONGLET 1 : BUREAU
+# ------------------------------------------------------------------------------------
 
-# --- ONGLET 1 : BUREAU ---
 if st.session_state.onglet_actuel == "Bureau":
     if not domaine:
         st.warning("⚠️ Veuillez sélectionner un domaine dans le Tiroir ou l'Arbre.")
@@ -64,7 +80,12 @@ if st.session_state.onglet_actuel == "Bureau":
             st.session_state.zoom_bureau = False
         
         mode_zoom = st.session_state.zoom_bureau
-        sous_comp = df_user[df_user['Parent'] == domaine]
+
+
+        df_user["Parent"] = df_user["Parent"].str.split(';')
+        df_user_sans_glo = df_user[df_user["ID"] != "GLO"].copy()
+        sous_comp = df_user_sans_glo[df_user_sans_glo["Parent"].apply(lambda x: domaine in x)]
+
         fig = None
 
         if not sous_comp.empty and len(sous_comp) >= 3:
@@ -83,8 +104,8 @@ if st.session_state.onglet_actuel == "Bureau":
             fig = go.Figure()
             fig.add_trace(go.Scatterpolar(
                 r=levels_closed, theta=labels_closed, fill='toself',
-                mode='lines+markers', fillcolor='rgba(255, 190, 190, 0.2)',
-                line=dict(color="#991515", width=3), marker=dict(size=6)
+                mode='lines+markers', fillcolor='rgba(255, 255, 255, 0.2)',
+                line=dict(color="#FFFFFF", width=3), marker=dict(size=6)
             ))
             fig.update_layout(
                 polar=dict(gridshape='linear', radialaxis=dict(visible=True, range=range_r, gridcolor="#444"),
@@ -105,7 +126,7 @@ if st.session_state.onglet_actuel == "Bureau":
             with st.container(height=530):
                 # 1. RÉCUPÉRATION ET FILTRAGE
                 df_q = charger_quetes_user(user)
-                famille_ids = df_user[df_user['Parent'] == domaine]['ID'].tolist() + [domaine]
+                famille_ids = df_user_sans_glo[df_user_sans_glo['Parent'].apply(lambda x: domaine in x)]['ID'].tolist() + [domaine]
                 
                 # --- SECTION : QUÊTE PRINCIPALE ---
                 st.subheader("🌟 Quête Principale")
@@ -188,33 +209,6 @@ if st.session_state.onglet_actuel == "Bureau":
         with st.container(height='stretch'):
             st.subheader("🛠️ Forge des Quêtes")
             
-            # --- BLOC IA ---
-            with st.expander("✨ Invoquer l'Oracle", expanded=False):
-                st.select_slider(
-                    "Intensité du défi",
-                    options=["Petite", "Soutenue", "Épique"],
-                    value="Soutenue",
-                    key="intensite_choisie" 
-                )
-                
-                seed = st.text_input("Une idée ? (Ex: Sport, Code...)", key="seed_joueur")
-
-                if st.button("🔮 Générer la quête"):
-                    with st.spinner("L'Oracle forge ton destin..."):
-                        intensite_actuelle = st.session_state.intensite_choisie
-                        inspiration = st.session_state.seed_joueur
-                        
-                        # On envoie l'intensité à la fonction
-                        prop = generer_suggestion_quete(df_user, domaine, intensite_actuelle, inspiration)
-                        
-                        if "error" not in prop:
-                            # Calcul de l'XP avec le multiplicateur de difficulté du MONDE
-                            coef = {"Facile": 2.5, "Normal": 1.0, "Difficile": 0.7}.get(st.session_state.difficulte, 1.0)
-                            
-                            st.session_state.temp_titre = prop['titre']
-                            st.session_state.temp_xp = int(prop['xp_base'] * coef)
-                            st.session_state.temp_expl = prop['explication']
-                            st.rerun()
 
             with st.expander("🔨 Forger une Quête", expanded=False):
                 with st.form("form_nouvelle_quete", clear_on_submit=True):
@@ -224,7 +218,9 @@ if st.session_state.onglet_actuel == "Bureau":
                     
                     titre = st.text_input("Nom de la quête", value=t_val)
                     
-                    sous_domaines_dispo = df_user[df_user['Parent'] == domaine]
+                    masque = (df_user_sans_glo['Parent'].apply(lambda x: domaine in str(x)))# | (df_user_sans_glo["ID"] == domaine)
+
+                    sous_domaines_dispo = df_user_sans_glo[masque]
                     options_sd = dict(zip(sous_domaines_dispo['Label'], sous_domaines_dispo['ID']))
                     
                     # Si pas de sous-domaine, on cible le domaine lui-même
@@ -250,12 +246,15 @@ if st.session_state.onglet_actuel == "Bureau":
                             else:
                                 st.error(msg)
 
-# --- ONGLET 2 : TIROIR ---
+# ------------------------------------------------------------------------------------
+#   ONGLET 2 : TIROIR
+# ------------------------------------------------------------------------------------
+
 elif st.session_state.onglet_actuel == "Tiroir":
     st.subheader("🗄️ Tiroir des Domaines")
     
     # On ne garde que les domaines qui ont 'GLO' comme parent (Les racines)
-    domaines_racines = df_user[df_user['Parent'] == 'GLO']
+    domaines_racines = df_user[df_user['Type'] == 'Domaine']
     
     if domaines_racines.empty:
         st.info("Plante ta première graine dans l'Arbre des Compétences.")
@@ -273,43 +272,3 @@ elif st.session_state.onglet_actuel == "Tiroir":
                         st.session_state.domaine_actif = row['ID']
                         st.session_state.onglet_actuel = "Bureau"
                         st.rerun()
-
-# --- ONGLET 3 : GESTION ---
-elif st.session_state.onglet_actuel == "Gestion":
-
-    st.subheader("⚒️ Forge")
-
-    with st.expander("Créer un Domaine", expanded=False):
-        st.subheader("⚒️ Forge de nouveaux Domaines")
-        df_parent = df_user[df_user['Parent'] != 'META'].copy()
-        options_domaines = dict(zip(df_parent['Label'], df_parent['ID']))
-        with st.form("form_nouveau_domaine"):
-            nouveau_nom = st.text_input("Nom du futur domaine")
-            label_parent = st.selectbox("Domaine Parent", options=options_domaines.keys())
-            if st.form_submit_button("🔨 Forger le Domaine"):
-                if nouveau_nom:
-                    creer_domaine(user, options_domaines[label_parent], nouveau_nom)
-                    st.success("Domaine créé !")
-                    st.rerun()
-    st.divider()
-    st.subheader("🗑️ Zone de Danger")
-
-    with st.expander("Supprimer un Domaine", expanded=False):
-        # On propose de supprimer n'importe quel domaine sauf Global
-        options_suppr = {row['Label']: row['ID'] for _, row in df_user.iterrows() if row['ID'] != "GLO"}
-        
-        domaine_a_suppr_label = st.selectbox("Choisir le domaine à effacer", options=list(options_suppr.keys()), key="select_suppr")
-        id_a_suppr = options_suppr[domaine_a_suppr_label]
-        
-        st.warning(f"Attention, supprimer '{domaine_a_suppr_label}' est irréversible.")
-        
-        if st.button(f"Confirmer la suppression de {id_a_suppr}", type="primary"):
-            success, message = supprimer_domaine(user, id_a_suppr)
-            if success:
-                st.success(message)
-                # Si on vient de supprimer le domaine sur lequel on était, on reset
-                if st.session_state.domaine_actif == id_a_suppr:
-                    st.session_state.domaine_actif = "GLO"
-                st.rerun()
-            else:
-                st.error(message)

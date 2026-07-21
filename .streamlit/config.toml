@@ -1,21 +1,21 @@
+[server]
+enableStaticServing = true
+
 [theme]
 base = "dark"
-primaryColor = "#b90f0f"
-backgroundColor = "#2d2020"
-secondaryBackgroundColor = "#130c0c"
-codeBackgroundColor = "#1f1b1b"
+primaryColor = "#ffffff"
+backgroundColor = "#2b2b2b"
+secondaryBackgroundColor = "#202020"
 textColor = "#ffffff"
-linkColor = "#188b82"
-borderColor = "#727272"
-showWidgetBorder = true
-baseRadius = "0.3rem"
-buttonRadius = "full"
-headingFontWeights = [600, 500, 500, 500, 500, 500]
+borderColor = "#868686"
+headingFontWeights = [800, 600, 500, 400, 400]
 headingFontSizes = ["3rem", "2.5rem", "2.25rem", "2rem", "1.5rem"]
-chartCategoricalColors = ["#ffc862", "#2e3c7a", "#3f2554"]
+font = "google-sans"
+headingFont = "montserrat"
 
 [theme.sidebar]
-backgroundColor = "#010101"
-secondaryBackgroundColor = "#4f0808"
-codeBackgroundColor = "#2f2c2c"
-borderColor = "#727272"
+backgroundColor = "#000000"
+secondaryBackgroundColor = "#8d8d8d"
+borderColor = "#878787"
+font = "google-sans"
+headingFont = "montserrat"
