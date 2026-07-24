@@ -1,9 +1,16 @@
 import streamlit as st
 import pandas as pd
 import os
+import io
+import re
+from connexion import supabase
 from utils.data import charger_donnees_user
 from utils.progression import appliquer_atrophie, get_global_level
 from utils.clan_func import joueur_in_clan, role_in_clan
+
+# ------------------------------------------------------------------------------------
+#   0. MISE EN CACHE
+# ------------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------------
 #   1. CONFIGURATION DE L'ÉTAT
@@ -20,25 +27,36 @@ if "logged_in" not in st.session_state:
 # ------------------------------------------------------------------------------------
 
 def gerer_inscription(new_u, new_p):
+    bucket_name = "user_data"
+    nom_fichier = "user.csv"
+
     if not new_u or not new_p:
         st.error("Veuillez remplir tous les champs.")
         return
     
-    file = "users.csv"
-    # Charger ou créer le fichier des utilisateurs
-    if os.path.exists(file):
-        df = pd.read_csv(file)
-    else:
-        df = pd.DataFrame(columns=['user', 'pw'])
-
+    reponse_octets = supabase.storage.from_(bucket_name).download(nom_fichier)
+    df = pd.read_csv(io.BytesIO(reponse_octets))
+    print(df)
+    print("Succès ! Le fichier a été trouvé et chargé.")
+        
     # Vérifier si le pseudo existe déjà
     if new_u in df['user'].values:
         st.error("Ce pseudo est déjà utilisé par un autre héros.")
     else:
         # Ajouter le nouvel utilisateur
         new_row = pd.DataFrame([{'user': new_u, 'pw': new_p}])
-        df = pd.concat([df, new_row], ignore_index=True)
-        df.to_csv(file, index=False)
+        edited_df = pd.concat([df, new_row], ignore_index=True)
+
+        csv_buffer = io.StringIO()
+        edited_df.to_csv(csv_buffer, index=False)
+        csv_bytes = csv_buffer.getvalue().encode('utf-8')
+    
+    # 3. On pousse le fichier sur Supabase (l'option x-upsert écrase l'ancienne version)
+        supabase.storage.from_(bucket_name).upload(
+            path=nom_fichier,
+            file=csv_bytes,
+            file_options={"content-type": "text/csv", "x-upsert": "true"}
+        )
         
         # CRUCIAL : Créer le fichier de données du joueur immédiatement
         # pour éviter les erreurs au premier login
@@ -65,21 +83,27 @@ def login_page():
                 u = st.text_input("Pseudo", key="login_user")
                 p = st.text_input("Mot de passe", type="password", key="login_pw")
                 if st.button("Entrer dans l'aventure"):
-                    if os.path.exists("users.csv"):
-                        df = pd.read_csv("users.csv")
-                        user_match = df[(df['user'] == u) & (df['pw'].astype(str) == p)]
-                        if not user_match.empty:
-                            st.session_state.logged_in = True
-                            st.session_state.username = u 
-                            st.rerun()
+                    reponse_octets = supabase.storage.from_("user_data").download("user.csv")
+                    df = pd.read_csv(io.BytesIO(reponse_octets))
+                    user_match = df[(df['user'] == u) & (df['pw'].astype(str) == p)]
+                    if not user_match.empty:
+                        st.session_state.logged_in = True
+                        st.session_state.username = u 
+                        st.rerun()
                     st.error("Identifiants incorrects ou compte inexistant.")
+
+        regex = re.compile(r'[^a-zA-Z0-9]')
 
         with tab_sign_up:
             with st.container(border=True):
+                st.caption("le pseudo ne peut être composé que de lettres et de chiffres")
                 new_u = st.text_input("Choisir un pseudo", key="signup_user")
                 new_p = st.text_input("Choisir un mot de passe", type="password", key="signup_pw")
                 if st.button("Forger mon destin"):
-                    gerer_inscription(new_u, new_p)
+                    if regex.search(new_u) == None:
+                        gerer_inscription(new_u, new_p)                 
+                    else:
+                        st.error("Veuillez retirer les caractères spéciaux de votre pseudo")
 
 # ------------------------------------------------------------------------------------
 #   4. NAVIGATION ET LOGIQUE GLOBALE

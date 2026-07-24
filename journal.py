@@ -88,9 +88,12 @@ with tab3:
     # On filtre : on garde les lignes dont l'ID n'est PAS présent dans la colonne 'Parent'
     # On exclut aussi les lignes où l'ID est vide ou "Global" par sécurité
     mask_feuilles = ~df_xp['ID'].isin(df_xp['Parent'])
-    df_feuilles = df_xp[mask_feuilles]
+    #df_feuilles = df_xp[mask_feuilles]
 
+    #options_quetes = dict(zip(df_feuilles['Label'], df_feuilles['ID']))
+    df_feuilles = df_xp.loc[df_xp["Type"] == "Composant"]
     options_quetes = dict(zip(df_feuilles['Label'], df_feuilles['ID']))
+
 
     # 2. Création du formulaire
     with st.expander("➕ Forger une nouvelle quête", expanded=False):
@@ -106,5 +109,3 @@ with tab3:
             if submit:
                 creer_quete(st.session_state.username, comp_id, titre, xp_gain)
                 st.rerun()
-            else:
-                st.error("Donne un nom à ta quête, aventurier !")
