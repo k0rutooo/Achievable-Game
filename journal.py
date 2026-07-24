@@ -111,4 +111,4 @@ with tab3:
                     creer_quete(st.session_state.username, comp_id, titre, xp_gain)
                     st.rerun()
     except:
-        st.write("Pour créer des quêtes vous devez ajouter des domaines, vous pouvez le faire depuis la Base de Domaine")
+        st.caption("Pour créer des quêtes vous devez ajouter des domaines, vous pouvez le faire depuis la Base de Domaine")
