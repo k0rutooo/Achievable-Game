@@ -1,4 +1,4 @@
-from datetime import date
+import datetime
 
 import pandas as pd
 
@@ -34,7 +34,7 @@ def creer_quete(username, comp_id, titre, xp, type_quete="Secondaire"):
         if not existe.empty:
             return False, "Une quête principale est déjà en cours !"
 
-    nouveau_id = f"Q{len(df) + 2}_{datetime.datetime.now().strftime("%f"))}"
+    nouveau_id = f"Q{len(df) + 2}_{datetime.datetime.now().strftime('%f'))}"
     nouvelle_ligne = pd.DataFrame(
         [
             {
