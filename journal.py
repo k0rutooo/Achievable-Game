@@ -96,16 +96,19 @@ with tab3:
 
 
     # 2. Création du formulaire
-    with st.expander("➕ Forger une nouvelle quête", expanded=False):
-        with st.form("form_nouvelle_quete"):
-            titre = st.text_input("Nom de la quête")
-            # L'utilisateur choisit le Label, mais on récupérera l'ID
-            label_choisi = st.selectbox("Compétence liée", options=options_quetes.keys())
-            comp_id = options_quetes[label_choisi] # On récupère l'ID (ex: MUS)
-            
-            xp_gain = st.number_input("Récompense XP", value=50)
-            submit = st.form_submit_button("Forger la quête")
-            
-            if submit:
-                creer_quete(st.session_state.username, comp_id, titre, xp_gain)
-                st.rerun()
+    try:
+        with st.expander("➕ Forger une nouvelle quête", expanded=False):
+            with st.form("form_nouvelle_quete"):
+                titre = st.text_input("Nom de la quête")
+                # L'utilisateur choisit le Label, mais on récupérera l'ID
+                label_choisi = st.selectbox("Compétence liée", options=options_quetes.keys())
+                comp_id = options_quetes[label_choisi] # On récupère l'ID (ex: MUS)
+                
+                xp_gain = st.number_input("Récompense XP", value=50)
+                submit = st.form_submit_button("Forger la quête")
+                
+                if submit:
+                    creer_quete(st.session_state.username, comp_id, titre, xp_gain)
+                    st.rerun()
+    except:
+        st.write("Pour créer des quêtes vous devez ajouter des domaines, vous pouvez le faire depuis la Base de Domaine")
