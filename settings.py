@@ -19,7 +19,7 @@ def mode_admin(admin):
     if admin == False:
         with st.form("form admin"):
             
-            st.write("vous êtes actuellement en mode utilisateur standart")
+            st.write("vous êtes actuellement en mode utilisateur standard")
             password = st.text_input("Veuillez rentrer le mot de passe")
 
             submitted = st.form_submit_button("Continuer")
