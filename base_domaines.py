@@ -1,4 +1,5 @@
 import streamlit as st
+import re
 import pandas as pd
 from config import DATA_DOMAINE_DIR, DATA_ASSET_DIR
 from utils.data import charger_donnees_user,sauvegarder_donnees_user
@@ -24,7 +25,18 @@ chemin_asset = DATA_ASSET_DIR
 #   2. MANIPULATION DATAFRAME
 # ------------------------------------------------------------------------------------
 
+def split_parent(val):
+    if isinstance(val, str):
+        if ";" in val:
+            return val.split(';')
+        return val.split()
+    return []
+
 df_domaines = pd.read_csv(chemin_domaine_csv)
+
+df_domaines_affichage = df_domaines.copy()
+df_domaines_affichage["Parent"] = df_domaines_affichage["Parent"].apply(split_parent)
+
 df_domaines_split = df_domaines.copy()
 df_domaines_split['Parent'] = df_domaines_split['Parent'].str.split(';')
 
@@ -115,13 +127,8 @@ colonne_ajouter,colonne_intervalle,colonne_supprimer = st.columns([0.5, 0.1 ,0.5
 with colonne_ajouter:
     st.header("Domaines disponibles")
     st.divider()
-    for _, l in df_domaines[df_domaines["Type"] != "Composant"].iterrows():
-        if l["ID"] != "GLO" and l["ID"] not in df_user["ID"].values:
-
-            if ";" in l["Parent"]:
-                l["Parent"] = l["Parent"].split(';')
-            else:
-                l["Parent"] = l["Parent"].split()
+    for _, l in df_domaines_affichage[df_domaines_affichage["Type"] != "Composant"].iterrows():
+        if l["ID"] not in df_user["ID"].values:
 
             if l["Parent"] in liste_domaines_user or df_user["ID"].isin(l["Parent"]).any():
                 with st.container(border=True):

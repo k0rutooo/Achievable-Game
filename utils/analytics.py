@@ -9,7 +9,7 @@ def preparer_donnees_graphique(username, periode="Semaine"):
 
     if df_terminees.empty:
         return pd.DataFrame(columns=["Date", "XP"])
-
+    
     df_terminees["XP_Recompense"] = pd.to_numeric(
         df_terminees["XP_Recompense"], errors="coerce"
     ).fillna(0)
@@ -44,7 +44,6 @@ def preparer_donnees_echarts_bureau(username, domaine_id, periode="Semaine"):
 
     sous_domaines = df_user[df_user["Parent"].apply(lambda x: domaine_id in x)]
     ids_interet = sous_domaines["ID"].tolist() + [domaine_id]
-    print(sous_domaines,ids_interet)
     df_t = df_q[
         (df_q["Statut"] == "Terminée") & (df_q["ID_Competence"].isin(ids_interet))
     ].copy()

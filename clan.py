@@ -1,6 +1,6 @@
 import streamlit as st
 import time
-from utils.clan_func import creer_clan, joueur_in_clan, chercher_clan, classer_clans, rejoindre_clan, quitter_clan, afficher_membre, creer_chat,supprimer_chat, nettoyer_onglet_sheet, envoyer_message, role_in_clan, supprimer_clan, clan_option, charger_donnees_clan, membre_par_clan, actualiser_niveau_membre
+from utils.clan_func import creer_clan, joueur_in_clan, chercher_clan, rejoindre_clan, quitter_clan, afficher_membre, creer_chat,supprimer_chat, nettoyer_onglet_sheet, envoyer_message, role_in_clan, supprimer_clan, clan_option, charger_donnees_clan, membre_par_clan, actualiser_niveau_membre
 from utils.security import securite_page
 from utils.utils_asset import get_rang_image
 
@@ -25,7 +25,6 @@ debug = False
 
 joueur_in_clan(user)
 role_in_clan(st.session_state.get('clan'), user)
-
 
 clan_actuel = st.session_state.clan
 role_actuel = st.session_state.clan_role

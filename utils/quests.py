@@ -62,7 +62,7 @@ def valider_quete(username, id_quete):
     if mask.any():
         idx = df_q.index[mask][0]
         df_q.at[idx, "Statut"] = "Terminée"
-        df_q.at[idx, "Date_Completion"] = date.today().strftime("%d/%m/%Y")
+        df_q.at[idx, "Date_Completion"] = str(f"{date.today().strftime("%d/%m/%Y")}")
 
         id_comp = df_q.at[idx, "ID_Competence"]
         xp = int(df_q.at[idx, "XP_Recompense"])
