@@ -110,6 +110,7 @@ def generer_arbre_dynamique(df_arbre):
         # Découper la cellule s'il y a plusieurs parents séparés par ";"
             parents = str(row['Parent']).split(';')
             parents_filtrés = [p for p in parents if p in ids_valide]
+            print(f"parents: {parents}, ids_valide{ids_valide}, parents_filtrés{parents_filtrés}") #DEBUG
             
             for parent_id in parents_filtrés:
                 # Nettoyer les espaces vides potentiels
