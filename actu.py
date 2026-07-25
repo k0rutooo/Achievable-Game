@@ -71,10 +71,12 @@ st.space("small")
 
 url_insta = "https://www.instagram.com/achievableengrand/"
 url_discord = "https://discord.gg/dv9NpdVufu"
+url_youtube = "https://youtube.com/@achievable_fabio?si=CUTAQpBbl5YDr_XR"
 
 st.subheader("Nos Réseaux :")
 st.write("[Instagram](%s)"% url_insta)
 st.write("[Discord](%s)"% url_discord)
+st.write("[Youtube](%s)"% url_youtube)
 
 #------------------------------------------------------
 
