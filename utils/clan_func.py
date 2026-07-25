@@ -152,7 +152,8 @@ def quitter_clan(clan,user):
 
         st.session_state.clan = None
         st.session_state.clan_role = None
-
+    except:
+        st.error("Une erreur est survenue, veuillez réessayer plus tard et reporter le problème")
 
 def joueur_in_clan(user):
 
