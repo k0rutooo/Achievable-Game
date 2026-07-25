@@ -75,6 +75,7 @@ def generer_arbre_dynamique(df_arbre):
     tous_les_noeuds = pd.concat([df_arbre['ID'], df_arbre['Parent']]).dropna().unique()
 
     for _, row in df_arbre.iterrows():
+        print(f"row: {row}, df_arbre: {df_arbre}, tous les noeuds: {tous_les_noeuds}") #DEBUG
 
         # 1. Calcul de la profondeur pour ce nœud
         prof = calculer_profondeur(df_arbre, row['ID'])
