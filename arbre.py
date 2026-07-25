@@ -109,7 +109,7 @@ with c1:
     with st.container(border=True):
         node_id_clique = agraph(nodes=nodes, edges=edges, config=config)
 
-st.caption(f"L'arbre peut avoir des problèmes de génération quand on lui ajoute des domaines, dans ce cas là il faut rerun l'application (avec la touche R sur pc ou dans les options de la page")
+st.caption(f"L'arbre peut avoir des problèmes de génération quand on lui ajoute des domaines, dans ce cas là il faut rerun l'application (avec la touche R sur pc ou dans les options de la page)")
 if node_id_clique:
 
     if est_domaine_principal(df_arbre, node_id_clique):
