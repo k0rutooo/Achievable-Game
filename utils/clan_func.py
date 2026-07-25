@@ -144,15 +144,15 @@ def rejoindre_clan(clan,user):
 
 def quitter_clan(clan,user):
     nom_fichier = f"{clan}.csv"
-    if nom_fichier.exists():
-        df = pd.read_csv(nom_fichier)
+    try:
+        df = lire_csv_cloud(nom_fichier)
         df = df[df['membre'] != user]
-        df.to_csv(nom_fichier, index=False)
+        enregistrer_csv_cloud(df, nom_fichier)
         envoyer_message(clan,user,f"{user} vient de quitter {clan}")
 
         st.session_state.clan = None
         st.session_state.clan_role = None
-        st.rerun()
+
 
 def joueur_in_clan(user):
 
