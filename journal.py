@@ -80,6 +80,7 @@ with tab2:
 
 with tab3:
     st.title("🛡️ Tableau des Quêtes")
+    st.caption("1h de quête vaut en moyenne 100xp")
 
 # 1. On récupère les compétences disponibles pour le menu déroulant
     df_quete = charger_donnees_user(st.session_state.username)
