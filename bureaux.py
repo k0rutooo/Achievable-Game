@@ -208,6 +208,7 @@ if st.session_state.onglet_actuel == "Bureau":
 
         with st.container(height='stretch'):
             st.subheader("🛠️ Forge des Quêtes")
+            st.caption("1h de quête vaut, en moyenne, 100xp")
             
 
             with st.expander("🔨 Forger une Quête", expanded=False):
